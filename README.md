@@ -12,6 +12,7 @@ A collection of PowerShell GUI utilities for Windows IT and security operations.
 | Tool | Description |
 |------|-------------|
 | [NetworkSpeedChecker](./NetworkSpeedChecker_v4_4.ps1) | GUI network speed tester — local, remote, batch, traceroute, CSV export |
+| [ServerHealthCheck](./ServerHealthCheck_6.ps1) | GUI 12-point Windows Server health diagnostic — events, disk, CPU, security |
 
 ---
 
