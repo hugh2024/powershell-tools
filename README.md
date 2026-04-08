@@ -1,11 +1,8 @@
 # powershell-tools
 
-A collection of PowerShell GUI utilities for Windows IT and security operations.
-Built for sysadmins and security engineers managing Active Directory domain environments.
+A collection of PowerShell GUI utilities for Windows IT and security operations. Built for sysadmins and security engineers managing Active Directory domain environments.
 
-> **Author:** Hugh Gozlou
-> **License:** MIT
-> **GitHub:** [hugh2024/powershell-tools](https://github.com/hugh2024/powershell-tools)
+> **Author:** Hugh Gozlou &nbsp;|&nbsp; **License:** MIT &nbsp;|&nbsp; **GitHub:** [hugh2024/powershell-tools](https://github.com/hugh2024/powershell-tools)
 
 ---
 
@@ -13,6 +10,7 @@ Built for sysadmins and security engineers managing Active Directory domain envi
 
 | Tool | Version | Description |
 |------|---------|-------------|
+| [ADLockoutManager](#adlockoutmanager) | v1.0 | Real-time AD account lockout investigation and response |
 | [LocalAdminAuditor](#localadminauditor) | v9.0 | Audit local Administrators group across your AD domain |
 | [NetworkSpeedChecker](#networkspeedchecker) | v4.4 | Test network speed to local and remote machines |
 | [ServerHealthCheck](#serverhealthcheck) | v6.0 | 12-point health diagnostic for Windows Servers |
@@ -25,6 +23,9 @@ Built for sysadmins and security engineers managing Active Directory domain envi
 Run any tool directly from PowerShell - no download or installation needed:
 
 ```powershell
+# AD Lockout Manager
+irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/ADLockoutManager.ps1 | iex
+
 # Local Administrator Auditor
 irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/LocalAdminAuditor-GUI.ps1 | iex
 
@@ -42,16 +43,74 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/SecurityChe
 
 ---
 
-## LocalAdminAuditor
+## ADLockoutManager
 
-**Version:** v9.0 | **Requires:** Administrator, RSAT, PowerShell Remoting on targets
+**Version:** v1.0 &nbsp;|&nbsp; **Requires:** RSAT ActiveDirectory module, Domain Admin or Account Operators
 
-A WPF GUI tool that audits the local Administrators group across all Windows computers
-in your Active Directory domain. Find unexpected local admins, assess risk level, and
-remediate directly from the interface - without touching each machine individually.
+A modern dark-themed PowerShell GUI tool for investigating, tracking, and resolving Active Directory account lockouts in real time. Replaces LockoutStatus.exe with a full investigation and response workflow in one window.
 
 ### What it does
+- Queries all Domain Controllers simultaneously for locked accounts
+- Identifies the PDC Emulator and marks it in the DC list (`[PDC]`)
+- Investigates lockout source via Event ID 4740 (which machine) and 4625 (which process/service)
+- One-click unlock of individual accounts or bulk unlock all
+- Real-time auto-monitor with configurable refresh interval
+- Teams and Email alerting when new lockouts are detected
+- Password policy viewer including Fine-Grained Password Policies (FGPP)
+- Full audit log of every action with CSV export
+- Hover tooltips on every control
+- Auto-detects missing RSAT and offers to install it
 
+### Event IDs Used
+
+| Event ID | Source | What it reveals |
+|----------|--------|----------------|
+| 4740 | PDC Emulator | Account lockout - which machine sent bad credentials |
+| 4625 | Source machine | Failed logon - which process or service used stale credentials |
+
+### Key Features
+- **Search** - Find any AD account by username or display name
+- **Show All Locked** - List all currently locked accounts across all DCs
+- **Investigate Source** - Trace lockout to source machine and exact process
+- **Unlock Selected / Unlock All** - One-click resolution with confirmation
+- **Auto-Monitor** - Continuous refresh with Teams/Email alerts on new lockouts
+- **PDC Aware** - All Event 4740 queries run against the PDC Emulator
+- **Password Policy** - View domain policy and all FGPPs in one screen
+- **Audit Log** - Every search, unlock, and investigation logged with operator and timestamp
+
+### Prerequisites
+
+| Requirement | Notes |
+|-------------|-------|
+| PowerShell 5.1+ | Built into Windows 10/11 and Server 2016+ |
+| RSAT - ActiveDirectory module | Auto-installs if missing (requires internet + admin) |
+| Domain Admin or Account Operators | Required to read lockout events and unlock accounts |
+
+### Quick Start
+
+```powershell
+# Run as Administrator
+.\ADLockoutManager.ps1
+
+# Or one-liner (no download needed)
+irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/ADLockoutManager.ps1 | iex
+```
+
+1. Tool opens and detects your AD environment automatically
+2. Click **Show All Locked** to see all currently locked accounts
+3. Click a row to see full account details in the panel below
+4. Click **Investigate Source** to find what machine and process caused the lockout
+5. Click **Unlock Selected** to resolve it — action is logged automatically
+
+---
+
+## LocalAdminAuditor
+
+**Version:** v9.0 &nbsp;|&nbsp; **Requires:** Administrator, RSAT, PowerShell Remoting on targets
+
+A WPF GUI tool that audits the local Administrators group across all Windows computers in your Active Directory domain. Find unexpected local admins, assess risk level, and remediate directly from the interface - without touching each machine individually.
+
+### What it does
 - Queries Active Directory for all servers and/or workstations in your domain
 - Connects to each machine via PowerShell Remoting (WinRM) and reads the local Administrators group
 - Scores each finding by risk level (HIGH / MEDIUM / LOW) based on account type and machine type
@@ -67,7 +126,6 @@ remediate directly from the interface - without touching each machine individual
 | LOW | Teal | Group membership - lower risk, still worth documenting |
 
 ### Key Features
-
 - **Scan Targets:** Servers Only, Workstations Only, Both, or a specific list of computers
 - **Authenticate:** Supply alternate domain admin credentials without restarting PowerShell
 - **Exclusions:** Filter out expected accounts (Domain Admins, built-in Administrator, your org's secondary admin account prefix)
@@ -105,35 +163,24 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/LocalAdminA
 5. Right-click any finding to remediate, exclude, or investigate
 
 ### Settings
-
-Go to the **Settings tab** to configure:
-
-- **Secondary Admin Account Prefix** - your org's standard secondary admin naming convention
-  (e.g. `Fadmin`, `ladmin`, `secadmin`) - accounts matching this prefix are excluded from results
+- **Secondary Admin Account Prefix** - your org's standard secondary admin naming convention (e.g. `Fadmin`, `ladmin`, `secadmin`) - accounts matching this prefix are excluded from results
 - **Domain Admins / Built-in Administrator** - excluded by default (expected accounts)
 - **Custom Exclusion Patterns** - regex supported, one per line
 - **Computer Exclusions** - honeypots, test systems, and dev machines to skip entirely
 - **Output Directory** - where exports and scan history are saved
 - **Auto-export** - automatically save CSV after every scan
 
-### Remediation Warning
-
-> The **Remove Admin Account** right-click action connects to the remote machine via WinRM
-> and removes the selected account from the local Administrators group. This takes effect
-> immediately and cannot be easily undone. Always verify the account before removing.
-> All removals are logged in the Activity Log with the operator's Windows identity and timestamp.
+> **Remediation Warning:** The Remove Admin Account right-click action connects to the remote machine via WinRM and removes the selected account from the local Administrators group. This takes effect immediately and cannot be easily undone. Always verify the account before removing. All removals are logged in the Activity Log with the operator's Windows identity and timestamp.
 
 ---
 
 ## NetworkSpeedChecker
 
-**Version:** v4.4 | **Requires:** Administrator recommended, WinRM for remote testing
+**Version:** v4.4 &nbsp;|&nbsp; **Requires:** Administrator recommended, WinRM for remote testing
 
-A GUI network speed testing tool for measuring throughput between your machine and
-remote servers or workstations on the network.
+A GUI network speed testing tool for measuring throughput between your machine and remote servers or workstations on the network.
 
 ### What it does
-
 - Tests upload and download speed to local and remote machines
 - Supports batch testing across multiple targets simultaneously
 - Parallel execution with configurable throttle
@@ -141,7 +188,6 @@ remote servers or workstations on the network.
 - Exports results to CSV for reporting
 
 ### Key Features
-
 - **Local Test:** Measure speed on the local machine
 - **Remote Test:** Test speed to a specific computer via WinRM
 - **Batch Mode:** Import a list of computers and test all in parallel
@@ -161,15 +207,14 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/NetworkSpee
 
 ## ServerHealthCheck
 
-**Version:** v6.0 | **Requires:** Administrator, WinRM on target servers
+**Version:** v6.0 &nbsp;|&nbsp; **Requires:** Administrator, WinRM on target servers
 
-A GUI diagnostic tool that runs a 12-point health check on Windows Servers.
-Designed for quick triage during incidents or as part of a regular health review.
+A GUI diagnostic tool that runs a 12-point health check on Windows Servers. Designed for quick triage during incidents or as part of a regular health review.
 
 ### What it checks
 
 | Check | What it looks for |
-|-------|------------------|
+|-------|-------------------|
 | Disk Space | Drives below threshold (default 20% free) |
 | CPU Usage | High sustained CPU load |
 | Memory | Available RAM and page file usage |
@@ -184,7 +229,6 @@ Designed for quick triage during incidents or as part of a regular health review
 | Processes | Top CPU and memory consumers |
 
 ### Key Features
-
 - Run against local machine or any remote server via WinRM
 - Color-coded results (green / yellow / red) per check
 - Export full diagnostic report to HTML or CSV
@@ -203,10 +247,9 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/ServerHealt
 
 ## SecurityChecker
 
-**Version:** v2.6.9 | **Requires:** Administrator
+**Version:** v2.6.9 &nbsp;|&nbsp; **Requires:** Administrator
 
-A GUI subnet security scanner that checks Windows machines for common
-security misconfigurations. Useful for internal audits and hardening reviews.
+A GUI subnet security scanner that checks Windows machines for common security misconfigurations. Useful for internal audits and hardening reviews.
 
 ### What it checks
 
@@ -222,7 +265,6 @@ security misconfigurations. Useful for internal audits and hardening reviews.
 | RDP exposed | Informational - verify it is intentional and patched |
 
 ### Key Features
-
 - Scan a single IP, hostname, or entire subnet (CIDR notation)
 - Color-coded findings by severity
 - Export results to CSV for audit reporting
@@ -242,22 +284,21 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/SecurityChe
 
 ## Requirements Summary
 
-| Requirement | LocalAdminAuditor | NetworkSpeedChecker | ServerHealthCheck | SecurityChecker |
-|-------------|:-----------------:|:-------------------:|:-----------------:|:---------------:|
-| PowerShell 5.1+ | Yes | Yes | Yes | Yes |
-| Run as Administrator | Yes | Recommended | Yes | Yes |
-| RSAT / AD Module | Yes (auto-installs) | No | No | No |
-| WinRM on this machine | Yes (auto-enables) | Yes | Yes | No |
-| WinRM on targets | Yes | Yes | Yes | No |
-| Domain membership | Yes | No | No | No |
+| Requirement | ADLockoutManager | LocalAdminAuditor | NetworkSpeedChecker | ServerHealthCheck | SecurityChecker |
+|-------------|:----------------:|:-----------------:|:-------------------:|:-----------------:|:---------------:|
+| PowerShell 5.1+ | Yes | Yes | Yes | Yes | Yes |
+| Run as Administrator | Recommended | Yes | Recommended | Yes | Yes |
+| RSAT / AD Module | Yes (auto-installs) | Yes (auto-installs) | No | No | No |
+| WinRM on this machine | No | Yes (auto-enables) | Yes | Yes | No |
+| WinRM on targets | No | Yes | Yes | Yes | No |
+| Domain membership | Yes | Yes | No | No | No |
 
 ---
 
 ## General Notes
 
 - All tools are standalone `.ps1` files - no installation, no dependencies to download manually
-- Settings and history are saved per-tool in `%APPDATA%\<ToolName>\` as JSON
-- All tools are dark-themed WPF GUI applications - they open a window, not a console
+- All tools are dark-themed GUI applications - they open a window, not a console
 - Tested on Windows 10, Windows 11, Windows Server 2016, 2019, 2022
 - PowerShell 7+ is not required but is supported
 
@@ -265,5 +306,4 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/SecurityChe
 
 ## License
 
-MIT - free to use, modify, and distribute with attribution.
-See [LICENSE](LICENSE) for full text.
+MIT - free to use, modify, and distribute with attribution. See [LICENSE](LICENSE) for full text.
