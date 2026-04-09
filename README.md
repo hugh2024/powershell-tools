@@ -51,9 +51,9 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/AppHunter-P
 
 **Version:** v5.0 &nbsp;|&nbsp; **Requires:** PowerShell 5.1+, WinRM (remote queries), RSAT AD module (domain/OU/group scope)
 
-A dark-themed enterprise GUI tool for discovering, auditing, and managing installed software, Windows services, running processes, and scheduled tasks — across your local machine, a single remote host, or your entire Active Directory domain simultaneously.
+A dark-themed PowerShell GUI tool for discovering, auditing, and managing installed software, Windows services, running processes, and scheduled tasks — across your local machine, a single remote host, or your entire Active Directory domain simultaneously.
 
-Built as a faster alternative to creating queries in PDQ Inventory or Cortex XDR when you just need to know: *is this app installed, on which machines, and what version?*
+Useful when you need to quickly find what is installed across your environment, check service states, or take action on multiple machines without scripting.
 
 ### What it does
 
@@ -87,47 +87,6 @@ Built as a faster alternative to creating queries in PDQ Inventory or Cortex XDR
 | **Elevation** | One-click UAC relaunch as Administrator |
 | **Export** | CSV with timestamp, full result set |
 | **Pre-flight** | Auto-checks WinRM, RSAT, PSExec, elevation — offers to fix missing deps |
-
-### How it compares to PDQ Inventory / Cortex XDR
-
-| Task | PDQ Inventory | Cortex XDR | AppHunter Pro |
-|------|:------------:|:----------:|:-------------:|
-| Find installed version of an app | Create query → deploy → wait | Build report | Type name → Search → instant |
-| Check which machines have Java | Inventory scan | Policy report | Domain scope → Search |
-| Uninstall remotely | Deploy uninstall package | N/A | Check row → Uninstall |
-| Check if a service is running | N/A | Alert-based | Services tab → Search |
-| No license required | ❌ | ❌ | ✅ |
-| Works without agents | ❌ | ❌ | ✅ (WinRM only) |
-
-### Prerequisites
-
-| Requirement | Notes |
-|-------------|-------|
-| PowerShell 5.1+ | Built into Windows 10/11 and Server 2016+ |
-| WinRM service running | Required for remote queries. Pre-flight offers to enable automatically. |
-| RSAT: Active Directory module | Required for Domain / OU / Group scope. Pre-flight offers to install. |
-| Administrator (recommended) | Required for service management and some remote actions |
-| PSExec (optional) | Used as WinRM fallback. Not required — WinRM is preferred. |
-
-### Quick Start
-
-```powershell
-# Run as Administrator
-.\AppHunter-Pro.ps1
-
-# Or one-liner (no download needed)
-irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/AppHunter-Pro.ps1 | iex
-```
-
-1. Pre-flight check runs automatically — PASS / SKIP / FAIL for each dependency
-2. Click **Launch AppHunter**
-3. Select a **Search Type** on the left sidebar (Installed Software, Services, Processes, Tasks)
-4. Type a name in the search box — wildcards added automatically
-5. Select **Target Scope** (Local for quick check, Domain for org-wide)
-6. Click **Search**
-7. Check boxes next to the rows you want to act on
-8. Click an action button — **Uninstall**, **Stop**, **Kill Process**, etc.
-9. Confirm the dialog — result shown with exit code or error detail
 
 ---
 
@@ -220,7 +179,7 @@ A WPF GUI tool that audits the local Administrators group across all Windows com
 
 - **Scan Targets:** Servers Only, Workstations Only, Both, or a specific list of computers
 - **Authenticate:** Supply alternate domain admin credentials without restarting PowerShell
-- **Exclusions:** Filter out expected accounts (Domain Admins, built-in Administrator, your org's secondary admin account prefix)
+- **Exclusions:** Filter out expected accounts (Domain Admins, built-in Administrator, your secondary admin account prefix)
 - **Remote Remediation:** Remove accounts from local Administrators group directly from the UI - requires double confirmation, all actions logged with operator identity
 - **Export:** Executive Summary (HTML), CSV, PDF, clipboard
 - **Trends:** Historical analysis across multiple scans - see if findings are increasing or decreasing
@@ -256,7 +215,7 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/LocalAdminA
 
 ### Settings
 
-- **Secondary Admin Account Prefix** - your org's standard secondary admin naming convention (e.g. `Fadmin`, `ladmin`, `secadmin`) - accounts matching this prefix are excluded from results
+- **Secondary Admin Account Prefix** - your secondary admin naming convention (e.g. `Fadmin`, `ladmin`, `secadmin`) - accounts matching this prefix are excluded from results
 - **Domain Admins / Built-in Administrator** - excluded by default (expected accounts)
 - **Custom Exclusion Patterns** - regex supported, one per line
 - **Computer Exclusions** - honeypots, test systems, and dev machines to skip entirely
