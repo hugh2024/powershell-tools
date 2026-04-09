@@ -15,6 +15,7 @@ A collection of PowerShell GUI utilities for Windows IT and security operations.
 | [NetworkSpeedChecker](#networkspeedchecker) | v4.4 | Test network speed to local and remote machines |
 | [ServerHealthCheck](#serverhealthcheck) | v6.0 | 12-point health diagnostic for Windows Servers |
 | [SecurityChecker](#securitychecker) | v2.6.9 | Scan subnets for security misconfigurations |
+| [AppHunter Pro](#apphunter-pro) | v5.0 | Enterprise software & service discovery across your domain |
 
 ---
 
@@ -37,9 +38,96 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/ServerHealt
 
 # Security Checker
 irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/SecurityChecker-GUI-v2_6_9.ps1 | iex
+
+# AppHunter Pro
+irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/AppHunter-Pro.ps1 | iex
 ```
 
 > **Note:** Run PowerShell as Administrator for full functionality.
+
+---
+
+## AppHunter Pro
+
+**Version:** v5.0 &nbsp;|&nbsp; **Requires:** PowerShell 5.1+, WinRM (remote queries), RSAT AD module (domain/OU/group scope)
+
+A dark-themed enterprise GUI tool for discovering, auditing, and managing installed software, Windows services, running processes, and scheduled tasks — across your local machine, a single remote host, or your entire Active Directory domain simultaneously.
+
+Built as a faster alternative to creating queries in PDQ Inventory or Cortex XDR when you just need to know: *is this app installed, on which machines, and what version?*
+
+### What it does
+
+- Searches installed software (registry / Programs and Features equivalent), Windows services, running processes, and scheduled tasks
+- Targets local machine, single remote host, entire AD domain, specific OU, or AD security group
+- Parallel domain-wide queries using background jobs — configurable thread count (1–50) and per-machine timeout
+- Auto-wildcard search — type `airlock` or `zoom` and it searches as `*airlock*` automatically (case-insensitive)
+- Checkbox column — check specific rows across multiple machines, then act on only those
+- Uninstall apps remotely with exit code feedback and success/failure dialog
+- Start, Stop, Restart, or permanently remove Windows services
+- Force-terminate running processes
+- Pre-flight dependency check on every launch (WinRM, RSAT, elevation status)
+- One-click UAC elevation — relaunch as Administrator without closing
+- Alternate credentials support for remote connections
+- Right-click context menu with full action set
+- Export all results to CSV
+
+### Key Features
+
+| Feature | Details |
+|---------|---------|
+| **Search Types** | Installed Software, Windows Services, Running Processes, Scheduled Tasks |
+| **Target Scopes** | Local, Remote Host, Entire AD Domain, Specific OU, AD Security Group |
+| **Parallel Queries** | Background jobs, 1–50 configurable threads, per-machine timeout (5–120s) |
+| **Smart Search** | Wildcards auto-added, case-insensitive, partial name matching |
+| **Checkbox Selection** | Check specific rows, act on only those — safe multi-machine operations |
+| **Software Actions** | Uninstall with exit code dialog, copy install path |
+| **Service Actions** | Start, Stop, Restart, Delete (sc.exe delete with confirmation) |
+| **Process Actions** | Force-kill with confirmation |
+| **Credentials** | Alternate domain credentials for remote connections |
+| **Elevation** | One-click UAC relaunch as Administrator |
+| **Export** | CSV with timestamp, full result set |
+| **Pre-flight** | Auto-checks WinRM, RSAT, PSExec, elevation — offers to fix missing deps |
+
+### How it compares to PDQ Inventory / Cortex XDR
+
+| Task | PDQ Inventory | Cortex XDR | AppHunter Pro |
+|------|:------------:|:----------:|:-------------:|
+| Find installed version of an app | Create query → deploy → wait | Build report | Type name → Search → instant |
+| Check which machines have Java | Inventory scan | Policy report | Domain scope → Search |
+| Uninstall remotely | Deploy uninstall package | N/A | Check row → Uninstall |
+| Check if a service is running | N/A | Alert-based | Services tab → Search |
+| No license required | ❌ | ❌ | ✅ |
+| Works without agents | ❌ | ❌ | ✅ (WinRM only) |
+
+### Prerequisites
+
+| Requirement | Notes |
+|-------------|-------|
+| PowerShell 5.1+ | Built into Windows 10/11 and Server 2016+ |
+| WinRM service running | Required for remote queries. Pre-flight offers to enable automatically. |
+| RSAT: Active Directory module | Required for Domain / OU / Group scope. Pre-flight offers to install. |
+| Administrator (recommended) | Required for service management and some remote actions |
+| PSExec (optional) | Used as WinRM fallback. Not required — WinRM is preferred. |
+
+### Quick Start
+
+```powershell
+# Run as Administrator
+.\AppHunter-Pro.ps1
+
+# Or one-liner (no download needed)
+irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/AppHunter-Pro.ps1 | iex
+```
+
+1. Pre-flight check runs automatically — PASS / SKIP / FAIL for each dependency
+2. Click **Launch AppHunter**
+3. Select a **Search Type** on the left sidebar (Installed Software, Services, Processes, Tasks)
+4. Type a name in the search box — wildcards added automatically
+5. Select **Target Scope** (Local for quick check, Domain for org-wide)
+6. Click **Search**
+7. Check boxes next to the rows you want to act on
+8. Click an action button — **Uninstall**, **Stop**, **Kill Process**, etc.
+9. Confirm the dialog — result shown with exit code or error detail
 
 ---
 
@@ -50,6 +138,7 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/SecurityChe
 A modern dark-themed PowerShell GUI tool for investigating, tracking, and resolving Active Directory account lockouts in real time. Replaces LockoutStatus.exe with a full investigation and response workflow in one window.
 
 ### What it does
+
 - Queries all Domain Controllers simultaneously for locked accounts
 - Identifies the PDC Emulator and marks it in the DC list (`[PDC]`)
 - Investigates lockout source via Event ID 4740 (which machine) and 4625 (which process/service)
@@ -69,6 +158,7 @@ A modern dark-themed PowerShell GUI tool for investigating, tracking, and resolv
 | 4625 | Source machine | Failed logon - which process or service used stale credentials |
 
 ### Key Features
+
 - **Search** - Find any AD account by username or display name
 - **Show All Locked** - List all currently locked accounts across all DCs
 - **Investigate Source** - Trace lockout to source machine and exact process
@@ -111,6 +201,7 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/ADLockoutMa
 A WPF GUI tool that audits the local Administrators group across all Windows computers in your Active Directory domain. Find unexpected local admins, assess risk level, and remediate directly from the interface - without touching each machine individually.
 
 ### What it does
+
 - Queries Active Directory for all servers and/or workstations in your domain
 - Connects to each machine via PowerShell Remoting (WinRM) and reads the local Administrators group
 - Scores each finding by risk level (HIGH / MEDIUM / LOW) based on account type and machine type
@@ -126,6 +217,7 @@ A WPF GUI tool that audits the local Administrators group across all Windows com
 | LOW | Teal | Group membership - lower risk, still worth documenting |
 
 ### Key Features
+
 - **Scan Targets:** Servers Only, Workstations Only, Both, or a specific list of computers
 - **Authenticate:** Supply alternate domain admin credentials without restarting PowerShell
 - **Exclusions:** Filter out expected accounts (Domain Admins, built-in Administrator, your org's secondary admin account prefix)
@@ -163,6 +255,7 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/LocalAdminA
 5. Right-click any finding to remediate, exclude, or investigate
 
 ### Settings
+
 - **Secondary Admin Account Prefix** - your org's standard secondary admin naming convention (e.g. `Fadmin`, `ladmin`, `secadmin`) - accounts matching this prefix are excluded from results
 - **Domain Admins / Built-in Administrator** - excluded by default (expected accounts)
 - **Custom Exclusion Patterns** - regex supported, one per line
@@ -181,6 +274,7 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/LocalAdminA
 A GUI network speed testing tool for measuring throughput between your machine and remote servers or workstations on the network.
 
 ### What it does
+
 - Tests upload and download speed to local and remote machines
 - Supports batch testing across multiple targets simultaneously
 - Parallel execution with configurable throttle
@@ -188,6 +282,7 @@ A GUI network speed testing tool for measuring throughput between your machine a
 - Exports results to CSV for reporting
 
 ### Key Features
+
 - **Local Test:** Measure speed on the local machine
 - **Remote Test:** Test speed to a specific computer via WinRM
 - **Batch Mode:** Import a list of computers and test all in parallel
@@ -229,6 +324,7 @@ A GUI diagnostic tool that runs a 12-point health check on Windows Servers. Desi
 | Processes | Top CPU and memory consumers |
 
 ### Key Features
+
 - Run against local machine or any remote server via WinRM
 - Color-coded results (green / yellow / red) per check
 - Export full diagnostic report to HTML or CSV
@@ -265,6 +361,7 @@ A GUI subnet security scanner that checks Windows machines for common security m
 | RDP exposed | Informational - verify it is intentional and patched |
 
 ### Key Features
+
 - Scan a single IP, hostname, or entire subnet (CIDR notation)
 - Color-coded findings by severity
 - Export results to CSV for audit reporting
@@ -284,14 +381,14 @@ irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/SecurityChe
 
 ## Requirements Summary
 
-| Requirement | ADLockoutManager | LocalAdminAuditor | NetworkSpeedChecker | ServerHealthCheck | SecurityChecker |
-|-------------|:----------------:|:-----------------:|:-------------------:|:-----------------:|:---------------:|
-| PowerShell 5.1+ | Yes | Yes | Yes | Yes | Yes |
-| Run as Administrator | Recommended | Yes | Recommended | Yes | Yes |
-| RSAT / AD Module | Yes (auto-installs) | Yes (auto-installs) | No | No | No |
-| WinRM on this machine | No | Yes (auto-enables) | Yes | Yes | No |
-| WinRM on targets | No | Yes | Yes | Yes | No |
-| Domain membership | Yes | Yes | No | No | No |
+| Requirement | ADLockoutManager | LocalAdminAuditor | NetworkSpeedChecker | ServerHealthCheck | SecurityChecker | AppHunter Pro |
+|-------------|:----------------:|:-----------------:|:-------------------:|:-----------------:|:---------------:|:-------------:|
+| PowerShell 5.1+ | Yes | Yes | Yes | Yes | Yes | Yes |
+| Run as Administrator | Recommended | Yes | Recommended | Yes | Yes | Recommended |
+| RSAT / AD Module | Yes (auto-installs) | Yes (auto-installs) | No | No | No | Domain scope only |
+| WinRM on this machine | No | Yes (auto-enables) | Yes | Yes | No | Remote queries |
+| WinRM on targets | No | Yes | Yes | Yes | No | Remote queries |
+| Domain membership | Yes | Yes | No | No | No | Domain scope only |
 
 ---
 
