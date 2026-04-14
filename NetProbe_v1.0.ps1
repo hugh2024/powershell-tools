@@ -13,11 +13,30 @@ $Script:AppName = 'NetProbe'
 $Script:AppVersion = '1.0'
 
 # ── NMAP PATH ─────────────────────────────────────────────────────────────────
-$ScriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
-$NmapPath   = Join-Path $ScriptDir "nmap\nmap.exe"
-if (-not (Test-Path $NmapPath)) {
+$ScriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($PSCommandPath) {
+    Split-Path -Parent $PSCommandPath
+} elseif ($MyInvocation.MyCommand.Path) {
+    Split-Path -Parent $MyInvocation.MyCommand.Path
+} else {
+    (Get-Location).Path
+}
+
+$NmapCandidates = @(
+    (Join-Path $ScriptDir "nmap\nmap.exe"),
+    (Join-Path $ScriptDir "nmap.exe"),
+    "$env:ProgramFiles\Nmap\nmap.exe",
+    "${env:ProgramFiles(x86)}\Nmap\nmap.exe"
+) | Where-Object { $_ }
+
+$NmapPath = $NmapCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if (-not $NmapPath) {
     $sys = Get-Command nmap -ErrorAction SilentlyContinue
-    $NmapPath = if ($sys) { $sys.Source } else { $null }
+    if ($sys -and $sys.Source) {
+        $NmapPath = $sys.Source
+    }
 }
 
 # ── XAML ──────────────────────────────────────────────────────────────────────
