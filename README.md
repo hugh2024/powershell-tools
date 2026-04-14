@@ -22,6 +22,13 @@ A collection of PowerShell GUI utilities for Windows IT and security operations.
 
 Run any tool directly from PowerShell - no download or installation needed:
 
+## Security Notice
+
+Always review scripts before running them from the internet.
+
+For production or sensitive environments, download the script locally and inspect it before execution.
+
+
 ```powershell
 # NetProbe
 irm https://raw.githubusercontent.com/hugh2024/powershell-tools/main/NetProbe_v1.0.ps1 | iex
