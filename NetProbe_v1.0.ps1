@@ -838,7 +838,8 @@ $BtnPN.Add_Click({  Clear-Checks; $ChkPE.IsChecked=$true; $ChkPS.IsChecked=$true
 # ── LIVE PREVIEW ──────────────────────────────────────────────────────────────
 @($ChkSynS,$ChkTcpC,$ChkUdp,$ChkAckS,$ChkSV,$ChkO,$ChkSC,$ChkA,
   $ChkPn,$ChkPS,$ChkPA,$ChkPE,$ChkV,$ChkOpen,$ChkRsn,$ChkN) | ForEach-Object {
-    $_.Add_Checked({Update-Preview}); $_.Add_Unchecked({Update-Preview})
+    [void]$_.Add_Checked({Update-Preview})
+    [void]$_.Add_Unchecked({Update-Preview})
 }
 $TxtTarget.Add_TextChanged({Update-Preview})
 $TxtPorts.Add_TextChanged({Update-Preview})
@@ -1124,5 +1125,5 @@ $Window.Add_KeyDown({
 # ── LAUNCH ────────────────────────────────────────────────────────────────────
 Update-Preview
 Switch-Tab 'nmap'
-$TxtTarget.Focus()
+[void]$TxtTarget.Focus()
 $Window.ShowDialog() | Out-Null
